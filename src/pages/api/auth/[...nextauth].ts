@@ -8,7 +8,7 @@ import { sourceMapsEnabled } from "process";
 
 export default NextAuth({
     session: {
-        maxAge: 60
+        maxAge: 5 * 60
     },
     providers: [
         GoogleProvider({
@@ -18,9 +18,6 @@ export default NextAuth({
     ],
     callbacks: {
         async signIn(params) {
-            // const response: AxiosResponse<AuthenticateResponseBody> = await authenticate({ tokenId: params.account?.id_token, username: params.user.email as string });
-            // console.log(params);
-
             return true;
         },
         async session(params) {
@@ -29,12 +26,9 @@ export default NextAuth({
             return params.session;
         },
         async jwt(params) {
-            console.log('jwt');
-            try {
+            if (params.trigger == "signIn") {
                 const response: AxiosResponse<AuthenticateResponseBody> = await authenticate({ tokenId: params.account?.id_token, username: params.token.email as string });
                 params.token.accessToken = response.data.accessToken;
-            } catch (error) {
-                console.log(error);
             }
             return params.token;
         }
